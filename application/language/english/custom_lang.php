@@ -13,5 +13,6 @@
  */
 
 $lang = array(
-
+    'your order' => 'Your purchase order',
+    'position' => 'Position'
 );
