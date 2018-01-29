@@ -5,7 +5,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
  * InvoicePlane
  *
  * @author		InvoicePlane Developers & Contributors
- * @copyright	Copyright (c) 2012 - 2017 InvoicePlane.com
+ * @copyright	Copyright (c) 2012 - 2018 InvoicePlane.com
  * @license		https://invoiceplane.com/license.txt
  * @link		https://invoiceplane.com
  */
@@ -95,9 +95,13 @@ class Payment_Handler extends Base_Controller
             // Send the request
             $response = $gateway->purchase($request)->send();
 
+            // Add transactionReference from resonse to session data
+            $data = $this->session->userdata($invoice->invoice_url_key . '_online_payment');
+            $data['transactionReference'] = $response->getTransactionReference();
+            $this->session->set_userdata($invoice->invoice_url_key . '_online_payment', $data);
+
             // Process the response
             if ($response->isSuccessful()) {
-
                 $payment_note = trans('transaction_reference') . ': ' . $response->getTransactionReference() . "\n";
                 $payment_note .= trans('payment_provider') . ': ' . ucwords(str_replace('_', ' ', $d));
 
@@ -265,7 +269,12 @@ class Payment_Handler extends Base_Controller
 
             $this->db->insert('ip_merchant_responses', $db_array);
 
+            // Validate true if payment is succesful 
+            if($response->isSuccessful()){
             return true;
+            }
+
+            return false;
         }
 
         return false;
