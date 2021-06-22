@@ -1,5 +1,7 @@
 <?php
-if (!defined('BASEPATH')) exit('No direct script access allowed');
+if (!defined('BASEPATH')) {
+    exit('No direct script access allowed');
+}
 
 /*
  * InvoicePlane
@@ -15,6 +17,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
  */
 class Ajax extends Admin_Controller
 {
+
     public $ajax_controller = true;
 
     public function save()
@@ -35,7 +38,7 @@ class Ajax extends Admin_Controller
                 // Check if an item has either a quantity + price or name or description
                 if (!empty($item->item_name)) {
                     $item->item_quantity = ($item->item_quantity ? standardize_amount($item->item_quantity) : floatval(0));
-                    $item->item_price = ($item->item_quantity ? standardize_amount($item->item_price) : floatval(0));
+                    $item->item_price = ($item->item_price ? standardize_amount($item->item_price) : floatval(0));
                     $item->item_discount_amount = ($item->item_discount_amount) ? standardize_amount($item->item_discount_amount) : null;
                     $item->item_product_id = ($item->item_product_id ? $item->item_product_id : null);
                     if (property_exists($item, 'item_date')) {
@@ -60,12 +63,12 @@ class Ajax extends Admin_Controller
                     $this->form_validation->set_rules('item_name', trans('item'), 'required');
                     $this->form_validation->run();
 
-                    $response = array(
+                    $response = [
                         'success' => 0,
-                        'validation_errors' => array(
+                        'validation_errors' => [
                             'item_name' => form_error('item_name', '', ''),
-                        )
-                    );
+                        ],
+                    ];
 
                     echo json_encode($response);
                     exit;
@@ -94,7 +97,7 @@ class Ajax extends Admin_Controller
                 $invoice_number = $this->mdl_invoices->get_invoice_number($invoice_group_id);
             }
 
-            $db_array = array(
+            $db_array = [
                 'invoice_number' => $invoice_number,
                 'invoice_terms' => $this->input->post('invoice_terms'),
                 'invoice_date_created' => date_to_mysql($this->input->post('invoice_date_created')),
@@ -104,7 +107,7 @@ class Ajax extends Admin_Controller
                 'payment_method' => $this->input->post('payment_method'),
                 'invoice_discount_amount' => standardize_amount($invoice_discount_amount),
                 'invoice_discount_percent' => standardize_amount($invoice_discount_percent),
-            );
+            ];
 
             // check if status changed to sent, the feature is enabled and settings is set to sent
             if ($this->config->item('disable_read_only') === false) {
@@ -117,7 +120,7 @@ class Ajax extends Admin_Controller
             $sumexInvoice = $this->mdl_invoices->where('sumex_invoice', $invoice_id)->get()->num_rows();
 
             if ($sumexInvoice >= 1) {
-                $sumex_array = array(
+                $sumex_array = [
                     'sumex_invoice' => $invoice_id,
                     'sumex_reason' => $this->input->post('invoice_sumex_reason'),
                     'sumex_diagnosis' => $this->input->post('invoice_sumex_diagnosis'),
@@ -125,8 +128,8 @@ class Ajax extends Admin_Controller
                     'sumex_treatmentend' => date_to_mysql($this->input->post('invoice_sumex_treatmentend')),
                     'sumex_casedate' => date_to_mysql($this->input->post('invoice_sumex_casedate')),
                     'sumex_casenumber' => $this->input->post('invoice_sumex_casenumber'),
-                    'sumex_observations' => $this->input->post('invoice_sumex_observations')
-                );
+                    'sumex_observations' => $this->input->post('invoice_sumex_observations'),
+                ];
                 $this->mdl_invoice_sumex->save($invoice_id, $sumex_array);
             }
 
@@ -134,20 +137,20 @@ class Ajax extends Admin_Controller
             $this->load->model('invoices/mdl_invoice_amounts');
             $this->mdl_invoice_amounts->calculate($invoice_id);
 
-            $response = array(
+            $response = [
                 'success' => 1,
-            );
+            ];
         } else {
             $this->load->helper('json_error');
-            $response = array(
+            $response = [
                 'success' => 0,
-                'validation_errors' => json_errors()
-            );
+                'validation_errors' => json_errors(),
+            ];
         }
 
         // Save all custom fields
         if ($this->input->post('custom')) {
-            $db_array = array();
+            $db_array = [];
 
             $values = [];
             foreach ($this->input->post('custom') as $custom) {
@@ -169,10 +172,10 @@ class Ajax extends Admin_Controller
             $this->load->model('custom_fields/mdl_invoice_custom');
             $result = $this->mdl_invoice_custom->save_custom($invoice_id, $db_array);
             if ($result !== true) {
-                $response = array(
+                $response = [
                     'success' => 0,
-                    'validation_errors' => $result
-                );
+                    'validation_errors' => $result,
+                ];
 
                 echo json_encode($response);
                 exit;
@@ -189,14 +192,14 @@ class Ajax extends Admin_Controller
         if ($this->mdl_invoice_tax_rates->run_validation()) {
             $this->mdl_invoice_tax_rates->save();
 
-            $response = array(
-                'success' => 1
-            );
+            $response = [
+                'success' => 1,
+            ];
         } else {
-            $response = array(
+            $response = [
                 'success' => 0,
-                'validation_errors' => $this->mdl_invoice_tax_rates->validation_errors
-            );
+                'validation_errors' => $this->mdl_invoice_tax_rates->validation_errors,
+            ];
         }
 
         echo json_encode($response);
@@ -209,16 +212,16 @@ class Ajax extends Admin_Controller
         if ($this->mdl_invoices->run_validation()) {
             $invoice_id = $this->mdl_invoices->create();
 
-            $response = array(
+            $response = [
                 'success' => 1,
-                'invoice_id' => $invoice_id
-            );
+                'invoice_id' => $invoice_id,
+            ];
         } else {
             $this->load->helper('json_error');
-            $response = array(
+            $response = [
                 'success' => 0,
-                'validation_errors' => json_errors()
-            );
+                'validation_errors' => json_errors(),
+            ];
         }
 
         echo json_encode($response);
@@ -231,15 +234,15 @@ class Ajax extends Admin_Controller
         if ($this->mdl_invoices_recurring->run_validation()) {
             $this->mdl_invoices_recurring->save();
 
-            $response = array(
+            $response = [
                 'success' => 1,
-            );
+            ];
         } else {
             $this->load->helper('json_error');
-            $response = array(
+            $response = [
                 'success' => 0,
-                'validation_errors' => json_errors()
-            );
+                'validation_errors' => json_errors(),
+            ];
         }
 
         echo json_encode($response);
@@ -261,12 +264,12 @@ class Ajax extends Admin_Controller
         $this->load->model('tax_rates/mdl_tax_rates');
         $this->load->model('clients/mdl_clients');
 
-        $data = array(
+        $data = [
             'invoice_groups' => $this->mdl_invoice_groups->get()->result(),
             'tax_rates' => $this->mdl_tax_rates->get()->result(),
             'client' => $this->mdl_clients->get_by_id($this->input->post('client_id')),
             'clients' => $this->mdl_clients->get_latest(),
-        );
+        ];
 
         $this->layout->load_view('invoices/modal_create_invoice', $data);
     }
@@ -277,10 +280,10 @@ class Ajax extends Admin_Controller
 
         $this->load->model('mdl_invoices_recurring');
 
-        $data = array(
+        $data = [
             'invoice_id' => $this->input->post('invoice_id'),
-            'recur_frequencies' => $this->mdl_invoices_recurring->recur_frequencies
-        );
+            'recur_frequencies' => $this->mdl_invoices_recurring->recur_frequencies,
+        ];
 
         $this->layout->load_view('invoices/modal_create_recurring', $data);
     }
@@ -298,11 +301,11 @@ class Ajax extends Admin_Controller
         $this->load->module('layout');
         $this->load->model('clients/mdl_clients');
 
-        $data = array(
+        $data = [
             'client_id' => $this->input->post('client_id'),
             'invoice_id' => $this->input->post('invoice_id'),
             'clients' => $this->mdl_clients->get_latest(),
-        );
+        ];
 
         $this->layout->load_view('invoices/modal_change_client', $data);
     }
@@ -319,22 +322,22 @@ class Ajax extends Admin_Controller
         if (!empty($client)) {
             $invoice_id = $this->input->post('invoice_id');
 
-            $db_array = array(
+            $db_array = [
                 'client_id' => $client_id,
-            );
+            ];
             $this->db->where('invoice_id', $invoice_id);
             $this->db->update('ip_invoices', $db_array);
 
-            $response = array(
+            $response = [
                 'success' => 1,
                 'invoice_id' => $invoice_id,
-            );
+            ];
         } else {
             $this->load->helper('json_error');
-            $response = array(
+            $response = [
                 'success' => 0,
-                'validation_errors' => json_errors()
-            );
+                'validation_errors' => json_errors(),
+            ];
         }
 
         echo json_encode($response);
@@ -348,12 +351,14 @@ class Ajax extends Admin_Controller
         $this->load->model('invoice_groups/mdl_invoice_groups');
         $this->load->model('tax_rates/mdl_tax_rates');
 
-        $data = array(
+        $data = [
             'invoice_groups' => $this->mdl_invoice_groups->get()->result(),
             'tax_rates' => $this->mdl_tax_rates->get()->result(),
             'invoice_id' => $this->input->post('invoice_id'),
-            'invoice' => $this->mdl_invoices->where('ip_invoices.invoice_id', $this->input->post('invoice_id'))->get()->row(),
-        );
+            'invoice' => $this->mdl_invoices->where('ip_invoices.invoice_id', $this->input->post('invoice_id'))
+                ->get()
+                ->row(),
+        ];
 
         $this->layout->load_view('invoices/modal_copy_invoice', $data);
     }
@@ -370,16 +375,16 @@ class Ajax extends Admin_Controller
 
             $this->mdl_invoices->copy_invoice($source_id, $target_id);
 
-            $response = array(
+            $response = [
                 'success' => 1,
-                'invoice_id' => $target_id
-            );
+                'invoice_id' => $target_id,
+            ];
         } else {
             $this->load->helper('json_error');
-            $response = array(
+            $response = [
                 'success' => 0,
-                'validation_errors' => json_errors()
-            );
+                'validation_errors' => json_errors(),
+            ];
         }
 
         echo json_encode($response);
@@ -393,12 +398,14 @@ class Ajax extends Admin_Controller
         $this->load->model('invoice_groups/mdl_invoice_groups');
         $this->load->model('tax_rates/mdl_tax_rates');
 
-        $data = array(
+        $data = [
             'invoice_groups' => $this->mdl_invoice_groups->get()->result(),
             'tax_rates' => $this->mdl_tax_rates->get()->result(),
             'invoice_id' => $this->input->post('invoice_id'),
-            'invoice' => $this->mdl_invoices->where('ip_invoices.invoice_id', $this->input->post('invoice_id'))->get()->row()
-        );
+            'invoice' => $this->mdl_invoices->where('ip_invoices.invoice_id', $this->input->post('invoice_id'))
+                ->get()
+                ->row(),
+        ];
 
         $this->layout->load_view('invoices/modal_create_credit', $data);
     }
@@ -418,29 +425,65 @@ class Ajax extends Admin_Controller
             // Set source invoice to read-only
             if ($this->config->item('disable_read_only') == false) {
                 $this->mdl_invoices->where('invoice_id', $source_id);
-                $this->mdl_invoices->update('ip_invoices', array('is_read_only' => '1'));
+                $this->mdl_invoices->update('ip_invoices', ['is_read_only' => '1']);
             }
 
             // Set target invoice to credit invoice
             $this->mdl_invoices->where('invoice_id', $target_id);
-            $this->mdl_invoices->update('ip_invoices', array('creditinvoice_parent_id' => $source_id));
+            $this->mdl_invoices->update('ip_invoices', ['creditinvoice_parent_id' => $source_id]);
 
             $this->mdl_invoices->where('invoice_id', $target_id);
-            $this->mdl_invoices->update('ip_invoice_amounts', array('invoice_sign' => '-1'));
+            $this->mdl_invoices->update('ip_invoice_amounts', ['invoice_sign' => '-1']);
 
-            $response = array(
+            $response = [
                 'success' => 1,
-                'invoice_id' => $target_id
-            );
+                'invoice_id' => $target_id,
+            ];
         } else {
             $this->load->helper('json_error');
-            $response = array(
+            $response = [
                 'success' => 0,
-                'validation_errors' => json_errors()
-            );
+                'validation_errors' => json_errors(),
+            ];
         }
 
         echo json_encode($response);
+    }
+
+    /**
+     * @param $invoice_id
+     */
+    public function delete_item($invoice_id)
+    {
+        $success = 0;
+        $item_id = $this->input->post('item_id');
+        $this->load->model('mdl_invoices');
+
+        // Only continue if the invoice exists or no item id was provided
+        if ($this->mdl_invoices->get_by_id($invoice_id) || empty($item_id)) {
+
+            // Delete invoice item
+            $this->load->model('mdl_items');
+            $item = $this->mdl_items->delete($item_id);
+
+            // Check if deletion was successful
+            if ($item) {
+
+                $success = 1;
+
+                // Mark task as complete from invoiced
+                if (isset($item->item_task_id) && $item->item_task_id) {
+                    $this->load->model('tasks/mdl_tasks');
+                    $this->mdl_tasks->update_status(3, $item->item_task_id);
+                }
+            }
+
+        }
+
+        // Return the response
+        echo json_encode([
+            'success' => $success
+        ]);
     }
 
 }
