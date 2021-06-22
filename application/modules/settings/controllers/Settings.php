@@ -33,6 +33,10 @@ class Settings extends Admin_Controller
         $this->config->load('payment_gateways');
         $gateways = $this->config->item('payment_gateways');
 
+        // Get the number formats configurations
+        $this->config->load('number_formats');
+        $number_formats = $this->config->item('number_formats');
+
         // Save input if request is POSt
         if ($this->input->post('settings')) {
             $settings = $this->input->post('settings');
@@ -71,6 +75,13 @@ class Settings extends Admin_Controller
                     $this->mdl_settings->save($key, $value);
 
                 }
+
+                if ($key == 'number_format') {
+                    // Set thousands_separator and decimal_point according to number_format
+                    $this->mdl_settings->save('decimal_point', $number_formats[$value]['decimal_point']);
+                    $this->mdl_settings->save('thousands_separator', $number_formats[$value]['thousands_separator']);
+                }
+
             }
 
             $upload_config = array(
@@ -118,7 +129,6 @@ class Settings extends Admin_Controller
         $this->load->model('invoice_groups/mdl_invoice_groups');
         $this->load->model('tax_rates/mdl_tax_rates');
         $this->load->model('email_templates/mdl_email_templates');
-        $this->load->model('settings/mdl_versions');
         $this->load->model('payment_methods/mdl_payment_methods');
         $this->load->model('invoices/mdl_templates');
 
@@ -132,10 +142,6 @@ class Settings extends Admin_Controller
 
         // Get all themes
         $available_themes = $this->mdl_settings->get_themes();
-
-        // Get the current version
-        $current_version = $this->mdl_versions->limit(1)->where('version_sql_errors', 0)->get()->row()->version_file;
-        $current_version = str_replace('.sql', '', substr($current_version, strpos($current_version, '_') + 1));
 
         // Set data in the layout
         $this->layout->set(
@@ -155,8 +161,8 @@ class Settings extends Admin_Controller
                 'email_templates_quote' => $this->mdl_email_templates->where('email_template_type', 'quote')->get()->result(),
                 'email_templates_invoice' => $this->mdl_email_templates->where('email_template_type', 'invoice')->get()->result(),
                 'gateway_drivers' => $gateways,
+                'number_formats' => $number_formats,
                 'gateway_currency_codes' => \Omnipay\Common\Currency::all(),
-                'current_version' => $current_version,
                 'first_days_of_weeks' => array('0' => lang('sunday'), '1' => lang('monday'))
             )
         );

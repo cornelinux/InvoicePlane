@@ -1,5 +1,5 @@
 <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table table-hover table-striped">
 
         <thead>
         <tr>
@@ -26,7 +26,7 @@
                         <?php _htmlsc(format_client($payment)); ?>
                     </a>
                 </td>
-                <td><?php echo format_currency($payment->payment_amount); ?></td>
+                <td class="amount"><?php echo format_currency($payment->payment_amount); ?></td>
                 <td><?php _htmlsc($payment->payment_method_name); ?></td>
                 <td><?php _htmlsc($payment->payment_note); ?></td>
                 <td>
@@ -42,11 +42,14 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="<?php echo site_url('payments/delete/' . $payment->payment_id); ?>"
-                                   onclick="return confirm('<?php _trans('delete_record_warning'); ?>');">
-                                    <i class="fa fa-trash-o fa-margin"></i>
-                                    <?php _trans('delete'); ?>
-                                </a>
+                                <form action="<?php echo site_url('payments/delete/' . $payment->payment_id); ?>"
+                                      method="POST">
+                                    <?php _csrf_field(); ?>
+                                    <button type="submit" class="dropdown-button"
+                                            onclick="return confirm('<?php _trans('delete_record_warning'); ?>');">
+                                        <i class="fa fa-trash-o fa-margin"></i> <?php _trans('delete'); ?>
+                                    </button>
+                                </form>
                             </li>
                         </ul>
                     </div>

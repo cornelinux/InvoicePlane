@@ -18,7 +18,7 @@
     <?php $this->layout->load_view('layout/alerts'); ?>
 
     <div class="table-responsive">
-        <table class="table table-striped">
+        <table class="table table-hover table-striped">
 
             <thead>
             <tr>
@@ -46,11 +46,14 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="<?php echo site_url('payment_methods/delete/' . $payment_method->payment_method_id); ?>"
-                                       onclick="return confirm('<?php _trans('delete_record_warning'); ?>');">
-                                        <i class="fa fa-trash-o fa-margin"></i>
-                                        <?php _trans('delete'); ?>
-                                    </a>
+                                    <form action="<?php echo site_url('payment_methods/delete/' . $payment_method->payment_method_id); ?>"
+                                          method="POST">
+                                        <?php _csrf_field(); ?>
+                                        <button type="submit" class="dropdown-button"
+                                                onclick="return confirm('<?php _trans('delete_record_warning'); ?>');">
+                                            <i class="fa fa-trash-o fa-margin"></i> <?php _trans('delete'); ?>
+                                        </button>
+                                    </form>
                                 </li>
                             </ul>
                         </div>

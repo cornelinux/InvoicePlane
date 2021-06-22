@@ -179,20 +179,6 @@ class Quotes extends Admin_Controller
 
     /**
      * @param $quote_id
-     * @param $item_id
-     */
-    public function delete_item($quote_id, $item_id)
-    {
-        // Delete quote item
-        $this->load->model('mdl_quote_items');
-        $this->mdl_quote_items->delete($item_id);
-
-        // Redirect to quote view
-        redirect('quotes/view/' . $quote_id);
-    }
-
-    /**
-     * @param $quote_id
      * @param bool $stream
      * @param null $quote_template
      */
@@ -201,6 +187,7 @@ class Quotes extends Admin_Controller
         $this->load->helper('pdf');
 
         if (get_setting('mark_quotes_sent_pdf') == 1) {
+            $this->mdl_quotes->generate_quote_number_if_applicable($quote_id);
             $this->mdl_quotes->mark_sent($quote_id);
         }
 

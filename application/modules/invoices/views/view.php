@@ -19,7 +19,10 @@ $cv = $this->controller->view_data["custom_values"];
         });
 
         $('.btn_add_task').click(function () {
-            $('#modal-placeholder').load("<?php echo site_url('tasks/ajax/modal_task_lookups/' . $invoice_id); ?>/" + Math.floor(Math.random() * 1000));
+            $('#modal-placeholder').load(
+                "<?php echo site_url('tasks/ajax/modal_task_lookups/' . $invoice_id); ?>/" +
+                Math.floor(Math.random() * 1000)
+            );
         });
 
         $('.btn_add_row').click(function () {
@@ -42,7 +45,7 @@ $cv = $this->controller->view_data["custom_values"];
         $('#invoice_change_client').click(function () {
             $('#modal-placeholder').load("<?php echo site_url('invoices/ajax/modal_change_client'); ?>", {
                 invoice_id: <?php echo $invoice_id; ?>,
-                client_id: "<?php echo $this->db->escape_str($invoice->client_id); ?>"
+                client_id: "<?php echo $this->db->escape_str($invoice->client_id); ?>",
             });
         });
 
@@ -74,7 +77,7 @@ $cv = $this->controller->view_data["custom_values"];
                     invoice_discount_percent: $('#invoice_discount_percent').val(),
                     invoice_terms: $('#invoice_terms').val(),
                     custom: $('input[name^=custom],select[name^=custom]').serializeArray(),
-                    payment_method: $('#payment_method').val()
+                    payment_method: $('#payment_method').val(),
                 },
                 function (data) {
                     <?php echo(IP_DEBUG ? 'console.log(data);' : ''); ?>
@@ -100,24 +103,49 @@ $cv = $this->controller->view_data["custom_values"];
             window.open('<?php echo site_url('invoices/generate_pdf/' . $invoice_id); ?>', '_blank');
         });
 
+        $(document).on('click', '.btn_delete_item', function () {
+            var btn = $(this);
+            var item_id = btn.data('item-id');
+
+            // Just remove the row if no item ID is set (new row)
+            if (typeof item_id === 'undefined') {
+                $(this).parents('.item').remove();
+            }
+
+            $.post("<?php echo site_url('invoices/ajax/delete_item/' . $invoice->invoice_id); ?>", {
+                    'item_id': item_id,
+                },
+                function (data) {
+                    <?php echo(IP_DEBUG ? 'console.log(data);' : ''); ?>
+                    var response = JSON.parse(data);
+
+                    if (response.success === 1) {
+                        btn.parents('.item').remove();
+                    } else {
+                        btn.removeClass('btn-link').addClass('btn-danger').prop('disabled', true);
+                    }
+                });
+        });
+
         <?php if ($invoice->is_read_only != 1): ?>
         var fixHelper = function (e, tr) {
             var $originals = tr.children();
             var $helper = tr.clone();
             $helper.children().each(function (index) {
-                $(this).width($originals.eq(index).width())
+                $(this).width($originals.eq(index).width());
             });
             return $helper;
         };
 
-        $("#item_table").sortable({
+        $('#item_table').sortable({
             items: 'tbody',
-            helper: fixHelper
+            helper: fixHelper,
         });
 
         if ($('#invoice_discount_percent').val().length > 0) {
             $('#invoice_discount_amount').prop('disabled', true);
         }
+
         if ($('#invoice_discount_amount').val().length > 0) {
             $('#invoice_discount_percent').prop('disabled', true);
         }
@@ -140,15 +168,15 @@ $cv = $this->controller->view_data["custom_values"];
 
         <?php if ($invoice->invoice_is_recurring) : ?>
         $(document).on('click', '.js-item-recurrence-toggler', function () {
-            var itemRecurrenceState = $(this).next("input").val();
-            if (itemRecurrenceState === ("1")) {
-                $(this).next("input").val("0");
-                $(this).removeClass("fa-calendar-check-o text-success");
-                $(this).addClass("fa-calendar-o text-muted");
+            var itemRecurrenceState = $(this).next('input').val();
+            if (itemRecurrenceState === ('1')) {
+                $(this).next('input').val('0');
+                $(this).removeClass('fa-calendar-check-o text-success');
+                $(this).addClass('fa-calendar-o text-muted');
             } else {
-                $(this).next("input").val("1");
-                $(this).removeClass("fa-calendar-o text-muted");
-                $(this).addClass("fa-calendar-check-o text-success");
+                $(this).next('input').val('1');
+                $(this).removeClass('fa-calendar-o text-muted');
+                $(this).addClass('fa-calendar-check-o text-success');
             }
         });
         <?php endif; ?>
@@ -196,7 +224,8 @@ if ($this->config->item('disable_read_only') == true) {
                         <a href="#" class="invoice-add-payment"
                            data-invoice-id="<?php echo $invoice_id; ?>"
                            data-invoice-balance="<?php echo $invoice->invoice_balance; ?>"
-                           data-invoice-payment-method="<?php echo $invoice->payment_method; ?>">
+                           data-invoice-payment-method="<?php echo $invoice->payment_method; ?>"
+                           data-payment-cf-exist="<?php echo $payment_cf_exist; ?>">
                             <i class="fa fa-credit-card fa-margin"></i>
                             <?php _trans('enter_payment'); ?>
                         </a>
@@ -219,7 +248,7 @@ if ($this->config->item('disable_read_only') == true) {
                 <li>
                     <a href="#" id="btn_create_recurring"
                        data-invoice-id="<?php echo $invoice_id; ?>">
-                        <i class="fa fa-repeat fa-margin"></i>
+                        <i class="fa fa-refresh fa-margin"></i>
                         <?php _trans('create_recurring'); ?>
                     </a>
                 </li>
@@ -250,7 +279,10 @@ if ($this->config->item('disable_read_only') == true) {
 
     <div class="headerbar-item invoice-labels pull-right">
         <?php if ($invoice->invoice_is_recurring) { ?>
-            <span class="label label-info"><?php _trans('recurring'); ?></span>
+            <span class="label label-info">
+                <i class="fa fa-refresh"></i>
+                <?php _trans('recurring'); ?>
+            </span>
         <?php } ?>
         <?php if ($invoice->is_read_only == 1) { ?>
             <span class="label label-danger">
@@ -265,7 +297,7 @@ if ($this->config->item('disable_read_only') == true) {
 
     <?php echo $this->layout->load_view('layout/alerts'); ?>
 
-    <form id="invoice_form">
+    <div id="invoice_form">
         <div class="invoice">
 
             <div class="row">
@@ -283,7 +315,7 @@ if ($this->config->item('disable_read_only') == true) {
                     </h3>
                     <br>
                     <div class="client-address">
-                        <?php $this->layout->load_view('clients/partial_client_address', array('client' => $invoice)); ?>
+                        <?php $this->layout->load_view('clients/partial_client_address', ['client' => $invoice]); ?>
                     </div>
                     <?php if ($invoice->client_phone || $invoice->client_email) : ?>
                         <hr>
@@ -389,7 +421,7 @@ if ($this->config->item('disable_read_only') == true) {
                                         } ?>
                                     </label>
                                     <select name="invoice_status_id" id="invoice_status_id"
-                                            class="form-control input-sm simple-select"
+                                            class="form-control input-sm simple-select" data-minimum-results-for-search="Infinity"
                                         <?php if ($invoice->is_read_only == 1 && $invoice->invoice_status_id == 4) {
                                             echo 'disabled="disabled"';
                                         } ?>>
@@ -411,8 +443,9 @@ if ($this->config->item('disable_read_only') == true) {
                                         } ?>>
                                         <option value="0"><?php _trans('select_payment_method'); ?></option>
                                         <?php foreach ($payment_methods as $payment_method) { ?>
-                                            <option <?php if ($invoice->payment_method == $payment_method->payment_method_id) echo "selected" ?>
-                                                    value="<?php echo $payment_method->payment_method_id; ?>">
+                                            <option <?php check_select($invoice->payment_method,
+                                                $payment_method->payment_method_id) ?>
+                                                value="<?php echo $payment_method->payment_method_id; ?>">
                                                 <?php echo $payment_method->payment_method_name; ?>
                                             </option>
                                         <?php } ?>
@@ -422,7 +455,7 @@ if ($this->config->item('disable_read_only') == true) {
                                 <div class="invoice-properties">
                                     <label><?php _trans('invoice_password'); ?></label>
                                     <input type="text" id="invoice_password" class="form-control input-sm"
-                                           value="<?php echo $invoice->invoice_password; ?>"
+                                           value="<?php _htmlsc($invoice->invoice_password); ?>"
                                         <?php if ($invoice->is_read_only == 1) {
                                             echo 'disabled="disabled"';
                                         } ?>>
@@ -531,7 +564,7 @@ if ($this->config->item('disable_read_only') == true) {
 
         </div>
 
-    </form>
+    </div>
 </div>
 
 <?php $this->layout->load_view('upload/dropzone-invoice-scripts'); ?>

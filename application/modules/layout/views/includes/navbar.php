@@ -59,6 +59,7 @@
                     <ul class="dropdown-menu">
                         <li><?php echo anchor('payments/form', trans('enter_payment')); ?></li>
                         <li><?php echo anchor('payments/index', trans('view_payments')); ?></li>
+                        <li><?php echo anchor('payments/online_logs', trans('view_payment_logs')); ?></li>
                     </ul>
                 </li>
 
@@ -71,8 +72,8 @@
                     <ul class="dropdown-menu">
                         <li><?php echo anchor('products/form', trans('create_product')); ?></li>
                         <li><?php echo anchor('products/index', trans('view_products')); ?></li>
-                        <li><?php echo anchor('families/index', trans('product_families')); ?></li>
-                        <li><?php echo anchor('units/index', trans('product_units')); ?></li>
+                        <li><?php echo anchor('families/index', trans('view_product_families')); ?></li>
+                        <li><?php echo anchor('units/index', trans('view_product_units')); ?></li>
                     </ul>
                 </li>
 
@@ -84,8 +85,10 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><?php echo anchor('tasks/form', trans('create_task')); ?></li>
-                        <li><?php echo anchor('tasks/index', trans('show_tasks')); ?></li>
-                        <li><?php echo anchor('projects/index', trans('projects')); ?></li>
+                        <li><?php echo anchor('tasks/index', trans('view_tasks')); ?></li>
+						<li role="separator" class="divider"></li>
+                        <li><?php echo anchor('projects/form', trans('create_project')); ?></li>
+                        <li><?php echo anchor('projects/index', trans('view_projects')); ?></li>
                     </ul>
                 </li>
 
@@ -117,7 +120,7 @@
 
             <ul class="nav navbar-nav navbar-right">
                 <li>
-                    <a href="http://docs.invoiceplane.com/" target="_blank"
+                    <a href="https://wiki.invoiceplane.com/" target="_blank"
                        class="tip icon" title="<?php _trans('documentation'); ?>"
                        data-placement="bottom">
                         <i class="fa fa-question-circle"></i>

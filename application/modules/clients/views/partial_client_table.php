@@ -1,5 +1,5 @@
 <div class="table-responsive">
-    <table class="table table-striped">
+    <table class="table table-hover table-striped">
         <thead>
         <tr>
             <th><?php _trans('active'); ?></th>
@@ -13,7 +13,9 @@
         <tbody>
         <?php foreach ($records as $client) : ?>
             <tr>
-                <td><?php echo ($client->client_active) ? trans('yes') : trans('no'); ?></td>
+				<td>
+					<?php echo ($client->client_active) ? '<span class="label active">' . trans('yes') . '</span>' : '<span class="label inactive">' . trans('no') . '</span>'; ?>
+				</td>
                 <td><?php echo anchor('clients/view/' . $client->client_id, htmlsc(format_client($client))); ?></td>
                 <td><?php _htmlsc($client->client_email); ?></td>
                 <td><?php _htmlsc($client->client_phone ? $client->client_phone : ($client->client_mobile ? $client->client_mobile : '')); ?></td>
@@ -47,10 +49,14 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="<?php echo site_url('clients/delete/' . $client->client_id); ?>"
-                                   onclick="return confirm('<?php _trans('delete_client_warning'); ?>');">
-                                    <i class="fa fa-trash-o fa-margin"></i> <?php _trans('delete'); ?>
-                                </a>
+                                <form action="<?php echo site_url('clients/delete/' . $client->client_id); ?>"
+                                      method="POST">
+                                    <?php _csrf_field(); ?>
+                                    <button type="submit" class="dropdown-button"
+                                            onclick="return confirm('<?php _trans('delete_client_warning'); ?>');">
+                                        <i class="fa fa-trash-o fa-margin"></i> <?php _trans('delete'); ?>
+                                    </button>
+                                </form>
                             </li>
                         </ul>
                     </div>
